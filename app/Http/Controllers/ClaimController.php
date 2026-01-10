@@ -14,7 +14,14 @@ class ClaimController extends Controller
      */
     public function index()
     {
-        //
+      // 1. Fetch the items posted by the LOGGED-IN user
+        $recentActivity = Item::where('user_id', Auth::id())
+            ->latest()            // Get newest first
+            ->take(5)             // Limit to 5 results
+            ->get();
+
+        // 2. Pass the variable to the view
+        return view('home', compact('recentActivity'));
     }
 
     /**
@@ -29,35 +36,38 @@ class ClaimController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request, Item $item)
-    {
-        // Prevent claiming own item
-        if ($item->user_id === Auth::id()) {
-            return back()->with('error', 'You cannot claim your own item.');
-        }
-
-        // Prevent duplicate claims
-        $existing = Claim::where('item_id', $item->id)
-            ->where('user_id', Auth::id())
-            ->first();
-
-        if ($existing) {
-            return back()->with('error', 'You already submitted a claim.');
-        }
-
-        $request->validate([
-            'message' => 'required|min:10',
-        ]);
-
-        Claim::create([
-            'item_id' => $item->id,
-            'user_id' => Auth::id(),
-            'message' => $request->message,
-        ]);
-
-        $item->update(['status' => 'claimed']);
-
-        return back()->with('success', 'Claim submitted successfully.');
+{
+    // 1. Prevent claiming own item
+    if ($item->user_id === Auth::id()) {
+        return back()->with('error', 'You cannot claim your own item.');
     }
+
+    // 2. Prevent duplicate claims by the SAME person
+    $existing = Claim::where('item_id', $item->id)
+        ->where('user_id', Auth::id())
+        ->first();
+
+    if ($existing) {
+        return back()->with('error', 'You already submitted a claim for this item.');
+    }
+
+    $request->validate([
+        'message' => 'required|min:10',
+    ]);
+
+    // 3. Create the claim
+    Claim::create([
+        'item_id' => $item->id,
+        'user_id' => Auth::id(),
+        'message' => $request->message,
+        'status' => 'pending', // Ensure your claims table has a status column
+    ]);
+
+    // IMPORTANT: We removed $item->update(['status' => 'claimed']);
+    // This allows the item to stay visible for other potential owners.
+
+    return back()->with('success', 'Claim submitted! The finder will review your message.');
+}
 
     /**
      * Display the specified resource.

@@ -6,6 +6,7 @@ use App\Http\Controllers\ClaimController;
 use App\Http\Controllers\OwnerController;
 use App\Http\Controllers\AdminController;
 use App\Http\Middleware\AdminMiddleware;
+use App\Http\Controllers\ProfileController;
 
 Route::get('/', function () {
     return view('login');
@@ -18,19 +19,29 @@ Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name
 
 
 Route::middleware(['auth'])->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
+    Route::get('/items/user', [ItemController::class, 'userItems'])->name('items.user')->middleware('auth');
+    // Add this inside your auth middleware group
+    Route::get('/my-items', [ItemController::class, 'userItems'])->name('items.user');
+    Route::get('/home', [ClaimController::class, 'index'])->name('home')->middleware('auth');
     Route::get('/items', [ItemController::class, 'index'])->name('items.index');
     Route::get('/items/create', [ItemController::class, 'create'])->name('items.create');
     Route::post('/items', [ItemController::class, 'store'])->name('items.store');
     Route::get('/items/{item}', [ItemController::class, 'show'])->name('items.show');
+    Route::get('/items/{item}/edit', [ItemController::class, 'edit'])->name('items.edit');
+    Route::put('/items/{item}', [ItemController::class, 'update'])->name('items.update');
+    Route::delete('/items/{item}', [ItemController::class, 'destroy'])->name('items.destroy');
 });
 
 
-Route::post('/items/{item}/claim', [ClaimController::class, 'store'])
-    ->name('items.claim')
-    ->middleware('auth');
+
 
 
 Route::middleware(['auth'])->group(function () {
+    Route::post('/items/{item}/claim', [ClaimController::class, 'store'])
+    ->name('items.claim')
+    ->middleware('auth');
     Route::get('/my-claims', [OwnerController::class, 'index'])->name('owner.claims');
     Route::post('/claims/{claim}/update', [OwnerController::class, 'update'])->name('owner.claims.update');
 });
