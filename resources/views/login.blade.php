@@ -11,6 +11,7 @@
             --secondary: #6366f1;
             --text-dark: #111827;
             --text-muted: #6b7280;
+            --danger: #ef4444; /* Added for errors */
             --transition: all 0.5s cubic-bezier(0.645, 0.045, 0.355, 1);
         }
 
@@ -25,7 +26,6 @@
             height: 100vh;
         }
 
-        /* SHRUNK CONTAINER: From 850px to 700px width, 550px to 420px height */
         .container {
             background-color: #fff;
             border-radius: 20px;
@@ -34,7 +34,7 @@
             overflow: hidden;
             width: 700px; 
             max-width: 95%;
-            min-height: 420px;
+            min-height: 450px; /* Increased slightly for error messages */
         }
 
         .form-container {
@@ -66,17 +66,15 @@
             align-items: center;
             justify-content: center;
             flex-direction: column;
-            padding: 0 30px; /* Reduced padding */
+            padding: 0 30px;
             height: 100%;
             text-align: center;
         }
 
-        /* SCALED DOWN TEXT */
         h1 { font-weight: 700; margin-bottom: 8px; font-size: 1.4rem; color: var(--text-dark); }
         p { font-size: 13px; color: var(--text-muted); margin-bottom: 15px; line-height: 1.4; }
-        .overlay p { color: rgba(255,255,255,0.9); } /* Better visibility on gradient */
+        .overlay p { color: rgba(255,255,255,0.9); }
 
-        /* SMALLER INPUTS */
         input {
             background-color: #f9fafb;
             border: 1px solid #e5e7eb;
@@ -89,9 +87,12 @@
             transition: 0.2s;
         }
 
+        /* Error styling for inputs */
+        input.is-invalid { border-color: var(--danger); background-color: #fef2f2; }
+        .error-msg { color: var(--danger); font-size: 10px; align-self: flex-start; margin-left: 5px; margin-bottom: 2px; }
+
         input:focus { border-color: var(--primary); background: #fff; box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
 
-        /* COMPACT BUTTON */
         button {
             border-radius: 10px;
             border: 1px solid var(--primary);
@@ -110,7 +111,6 @@
         button:active { transform: scale(0.96); }
         button.ghost { background-color: transparent; border-color: #ffffff; margin-top: 5px; }
 
-        /* OVERLAY SECTION - High Contrast */
         .overlay-container {
             position: absolute;
             top: 0;
@@ -153,11 +153,8 @@
 
         .overlay-left { transform: translateX(-20%); }
         .container.right-panel-active .overlay-left { transform: translateX(0); }
-
         .overlay-right { right: 0; transform: translateX(0); }
         .container.right-panel-active .overlay-right { transform: translateX(20%); }
-
-        .overlay h1 { color: #fff; }
 
         @media (max-width: 768px) {
             .container { width: 90%; min-height: 500px; }
@@ -176,10 +173,18 @@
             @csrf
             <h1>Join Us</h1>
             <p>Create your free account</p>
-            <input type="text" name="name" placeholder="Name" required />
-            <input type="email" name="email" placeholder="Email" required />
-            <input type="password" name="password" placeholder="Password" required />
+
+            @error('name') <span class="error-msg">{{ $message }}</span> @enderror
+            <input type="text" name="name" placeholder="Name" value="{{ old('name') }}" class="@error('name') is-invalid @enderror" required />
+
+            @error('email') <span class="error-msg">{{ $message }}</span> @enderror
+            <input type="email" name="email" placeholder="Email" value="{{ old('email') }}" class="@error('email') is-invalid @enderror" required />
+
+            @error('password') <span class="error-msg">{{ $message }}</span> @enderror
+            <input type="password" name="password" placeholder="Password" class="@error('password') is-invalid @enderror" required />
+            
             <input type="password" name="password_confirmation" placeholder="Confirm" required />
+            
             <button type="submit">Sign Up</button>
         </form>
     </div>
@@ -189,9 +194,19 @@
             @csrf
             <h1>Sign in</h1>
             <p>Enter your details</p>
-            <input type="email" name="email" placeholder="Email" required />
-            <input type="password" name="password" placeholder="Password" required />
-            <a href="#" style="font-size:11px; color:#94a3b8; margin-top:8px; text-decoration:none;">Forgot password?</a>
+
+            {{-- General Login Error (e.g., wrong credentials) --}}
+            @if (session('status'))
+                <span class="error-msg" style="align-self:center; margin-bottom:10px;">{{ session('status') }}</span>
+            @endif
+
+            @error('email') <span class="error-msg">{{ $message }}</span> @enderror
+            <input type="email" name="email" placeholder="Email" value="{{ old('email') }}" class="@error('email') is-invalid @enderror" required />
+
+            @error('password') <span class="error-msg">{{ $message }}</span> @enderror
+            <input type="password" name="password" placeholder="Password" class="@error('password') is-invalid @enderror" required />
+
+            <a href="{{ route('password.request') }}" style="font-size:11px; color:#94a3b8; margin-top:8px; text-decoration:none;">Forgot password?</a>
             <button type="submit">Sign In</button>
         </form>
     </div>
@@ -214,8 +229,22 @@
 
 <script>
     const container = document.getElementById('container');
-    document.getElementById('signUp').onclick = () => container.classList.add("right-panel-active");
-    document.getElementById('signIn').onclick = () => container.classList.remove("right-panel-active");
+    const signUpButton = document.getElementById('signUp');
+    const signInButton = document.getElementById('signIn');
+
+    signUpButton.addEventListener('click', () => {
+        container.classList.add("right-panel-active");
+    });
+
+    signInButton.addEventListener('click', () => {
+        container.classList.remove("right-panel-active");
+    });
+
+    // Check if there are registration errors on page load
+    // If there are, automatically switch to the Sign Up panel
+    @if($errors->has('name') || $errors->has('password') || (isset($errors) && $errors->has('email') && old('name')))
+        container.classList.add("right-panel-active");
+    @endif
 </script>
 
 </body>
