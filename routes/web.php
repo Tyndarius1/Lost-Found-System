@@ -7,9 +7,20 @@ use App\Http\Controllers\OwnerController;
 use App\Http\Controllers\AdminController;
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\FunController;
 
 Route::get('/', function () {
-    return view('login');
+    if (Auth::check()) {
+        // If the user is an admin, send them to /admin
+        if (Auth::user()->is_admin) { // Adjust 'is_admin' to your actual column name
+            return redirect('/admin');
+        }
+        // Otherwise, send them to /home
+        return redirect('/home');
+    }
+    
+    // If not logged in at all, show the landing page or login
+    return view('login'); 
 });
 
 Auth::routes();
@@ -19,6 +30,11 @@ Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name
 
 
 Route::middleware(['auth'])->group(function () {
+   Route::get('/fun', [FunController::class, 'index'])->name('fun.index')->middleware('auth');
+    Route::post('/notifications/read', function() {
+    Auth::user()->notifications()->update(['is_read' => true]);
+    return back();
+})->name('notifications.read');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
     Route::get('/items/user', [ItemController::class, 'userItems'])->name('items.user')->middleware('auth');

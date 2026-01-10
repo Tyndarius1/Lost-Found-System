@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Claim;
 use App\Models\Item;
+use Illuminate\Support\Facades\Auth;
 
 class OwnerController extends Controller
 {
@@ -20,25 +21,25 @@ class OwnerController extends Controller
 
     // Approve or reject claim
     public function update(Request $request, Claim $claim)
-    {
-        $request->validate([
-            'status' => 'required|in:approved,rejected'
-        ]);
-
-        // Ensure owner is updating their own item claim
-        if ($claim->item->user_id !== auth()->id()) {
-            abort(403);
-        }
-
-        $claim->update(['status' => $request->status]);
-
-        // Update item status if approved
-        if ($request->status === 'approved') {
-            $claim->item->update(['status' => 'returned']);
-        } else {
-            $claim->item->update(['status' => 'open']);
-        }
-
-        return back()->with('success', 'Claim status updated.');
+{
+    if ($claim->item->user_id !== Auth::id()) {
+        abort(403);
     }
+
+    $request->validate(['status' => 'required|in:approved,rejected']);
+    $claim->update(['status' => $request->status]);
+
+    // Create a notification for the claimant
+    \App\Models\Notification::create([
+        'user_id' => $claim->user_id,
+        'title' => 'Claim Update',
+        'message' => "Your claim for '{$claim->item->item_name}' has been " . strtoupper($request->status) . ".",
+    ]);
+
+    if ($request->status === 'approved') {
+        $claim->item->update(['status' => 'resolved']);
+    }
+
+    return back()->with('success', 'Claim ' . $request->status . ' and user notified!');
+}
 }

@@ -88,19 +88,31 @@
                 @endif
 
                 {{-- Claim Form --}}
-                @if($item->status === 'open' && auth()->id() !== $item->user_id)
-                    <form action="{{ route('items.claim', $item->id) }}" method="POST">
-                        @csrf
-                        <div class="input-group-modern mb-3">
-                            <textarea name="message" rows="3" placeholder=" " required></textarea>
-                            <label>Prove ownership (e.g. Serial number, specific marks...)</label>
-                        </div>
+@if($item->status === 'open' && auth()->id() !== $item->user_id)
+    <div class="mb-4">
+        <div class="p-3 mb-3 rounded-4 bg-warning bg-opacity-10 border border-warning border-opacity-25">
+            <div class="d-flex">
+                <i class="bi bi-exclamation-triangle-fill text-warning me-2 fs-5"></i>
+                <div>
+                    <h6 class="fw-bold text-dark mb-1">Ownership Note Required</h6>
+                    <p class="small text-secondary mb-0">To protect users, you must provide a detailed explanation. This note is <strong>required</strong> and must be at least <strong>10 characters</strong> long.</p>
+                </div>
+            </div>
+        </div>
 
-                        <button class="btn btn-primary w-100 py-3 fw-bold rounded-pill shadow-sm">
-                            <i class="bi bi-send-fill me-2"></i> Submit Claim
-                        </button>
-                    </form>
-                @endif
+        <form action="{{ route('items.claim', $item->id) }}" method="POST">
+            @csrf
+            <div class="input-group-modern mb-3">
+                <textarea name="message" rows="3" placeholder=" " minlength="10" required></textarea>
+                <label>Prove ownership (e.g. Serial number, specific marks...)</label>
+            </div>
+
+            <button class="btn btn-primary w-100 py-3 fw-bold rounded-pill shadow-sm">
+                <i class="bi bi-send-fill me-2"></i> Submit Claim
+            </button>
+        </form>
+    </div>
+@endif
 
                 @if(auth()->id() === $item->user_id)
                     <div class="bg-info bg-opacity-10 text-info p-3 rounded-4 border border-info border-opacity-25 text-center">
