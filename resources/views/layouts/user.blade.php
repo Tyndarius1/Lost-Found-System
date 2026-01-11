@@ -127,12 +127,21 @@
         <div class="nav-container">
             <a href="{{ route('home') }}" class="logo-link">
                 <div class="fw-bold text-primary fs-4" style="letter-spacing: -1px;">
-                    <i class="bi bi-intersect me-2"></i>L&F
+                    <i class="bi bi-intersect me-2"></i>Lost & Found
                 </div>
             </a>
 
             <ul class="nav-links d-none d-md-flex">
-                <li><a href="{{ route('home') }}" class="{{ request()->is('home') ? 'active' : '' }}">Dashboard</a></li>
+                <ul class="nav-links d-none d-md-flex">
+                    @if(auth()->check() && auth()->user()->role === 'admin')
+                        <li>
+                            <a href="/admin" class="{{ request()->is('admin') ? 'active' : '' }}">
+                                Dashboard
+                            </a>
+                        </li>
+                    @endif
+                </ul>
+
                 <li><a href="{{ route('items.index') }}" class="{{ request()->is('items*') && !request()->is('items/user') ? 'active' : '' }}">Browse Items</a></li>
                 
                 @auth
