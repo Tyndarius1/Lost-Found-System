@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('location');
             $table->date('date');
             $table->string('image')->nullable();
-            $table->enum('status', ['open', 'claimed', 'returned'])->default('open');
+            $table->enum('status', ['open', 'claimed', 'resolved'])->default('open');
             $table->timestamps();
         });
     }

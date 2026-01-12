@@ -81,7 +81,7 @@ class AdminController extends Controller
 
     // Update item status if approved
     if($request->status === 'approved'){
-        $claim->item->update(['status' => 'returned']);
+        $claim->item->update(['status' => 'resolved']);
     } else {
         $claim->item->update(['status' => 'open']);
     }
@@ -121,6 +121,70 @@ class AdminController extends Controller
         $item->update($data);
 
         return redirect()->route('admin.items')->with('success', 'Item updated successfully.');
+    }
+
+    public function updateUser(Request $request, User $user)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $user->id,
+            'role' => 'required|in:user,admin',
+            'age' => 'nullable|integer|min:1|max:120',
+            'bio' => 'nullable|string|max:500',
+            'phone' => 'nullable|string|max:20',
+            'profile_picture' => 'nullable|image|max:2048',
+        ]);
+
+        $data = $request->only(['name', 'email', 'role', 'age', 'bio', 'phone']);
+
+        if ($request->hasFile('profile_picture')) {
+            $data['profile_picture'] = $request->file('profile_picture')->store('profiles', 'public');
+        }
+
+        $user->update($data);
+
+        return redirect()->route('admin.users')->with('success', 'User updated successfully.');
+    }
+
+    public function createUser()
+    {
+        return view('admin.create-user');
+    }
+
+    public function storeUser(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|min:8|confirmed',
+            'role' => 'required|in:user,admin',
+            'age' => 'nullable|integer|min:1|max:120',
+            'bio' => 'nullable|string|max:500',
+            'phone' => 'nullable|string|max:20',
+            'profile_picture' => 'nullable|image|max:2048',
+        ]);
+
+        $data = $request->only(['name', 'email', 'role', 'age', 'bio', 'phone']);
+        $data['password'] = bcrypt($request->password);
+
+        if ($request->hasFile('profile_picture')) {
+            $data['profile_picture'] = $request->file('profile_picture')->store('profiles', 'public');
+        }
+
+        User::create($data);
+
+        return redirect()->route('admin.users')->with('success', 'User created successfully.');
+    }
+
+    public function editUser(User $user)
+    {
+        return view('admin.edit-user', compact('user'));
+    }
+
+    public function deleteUser(User $user)
+    {
+        $user->delete();
+        return back()->with('success', 'User deleted successfully.');
     }
 
 }

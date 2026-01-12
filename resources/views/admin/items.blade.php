@@ -3,6 +3,7 @@
 @section('content')
 <div class="container">
     <h1 class="mb-4">All Items</h1>
+    <a href="{{ route('items.create') }}" class="btn btn-warning mb-3">Add Item</a>
 
     <table class="table table-bordered">
         <thead>
@@ -25,8 +26,8 @@
     <td>{{ ucfirst($item->status) }}</td>
     <td>{{ $item->user->name }}</td>
     <td>
-        
-        <form action="{{ route('admin.items.delete', $item->id) }}" method="POST" onsubmit="return confirm('Delete this item?')">
+        <a href="{{ route('admin.items.edit', $item->id) }}" class="btn btn-primary btn-sm">Update</a>
+        <form action="{{ route('admin.items.delete', $item->id) }}" method="POST" onsubmit="return confirm('Delete this item?')" style="display: inline;">
             @csrf
             @method('DELETE')
             <button type="submit" class="btn btn-danger btn-sm">Delete</button>
