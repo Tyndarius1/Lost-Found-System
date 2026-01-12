@@ -4,10 +4,11 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ config('app.name', 'Laravel') }}</title>
+    <title>{{ config('app.name', 'Laravel') }} - Admin</title>
 
     <link href="https://fonts.bunny.net/css?family=Plus+Jakarta+Sans:400,500,600,700" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
 
@@ -25,7 +26,6 @@
             margin: 0;
         }
         
-        /* Layout Structure */
         .wrapper { display: flex; min-height: 100vh; }
         
         .sidebar {
@@ -36,7 +36,7 @@
             height: 100vh;
             padding: 1.5rem;
             display: flex;
-            flex-direction: column; /* Allows mt-auto to work */
+            flex-direction: column;
             z-index: 1000;
         }
 
@@ -46,7 +46,6 @@
             padding: 2rem 3rem;
         }
 
-        /* Navigation Links */
         .nav-link {
             display: flex;
             align-items: center;
@@ -62,9 +61,8 @@
         .nav-link.active { background: #eef2ff; color: var(--primary-color); }
         .nav-link i { margin-right: 12px; font-size: 1.1rem; }
 
-        /* User Profile Section at Bottom */
         .user-profile-container {
-            margin-top: auto; /* Pushes this section to the bottom */
+            margin-top: auto; 
             padding-top: 1.5rem;
             border-top: 1px solid #e5e7eb;
             position: relative;
@@ -84,17 +82,16 @@
         }
         .user-trigger:hover { background: #f3f4f6; }
 
-        /* Popup Logout Menu */
         .logout-popup {
             position: absolute;
-            bottom: calc(100% + 12px); /* Floats above the profile */
+            bottom: calc(100% + 12px);
             left: 0;
             right: 0;
             background: #fff;
             border: 1px solid #e5e7eb;
             border-radius: 14px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-            display: none; /* Hidden by default */
+            display: none;
             overflow: hidden;
             z-index: 1100;
         }
@@ -129,62 +126,59 @@
 <body>
     <div class="wrapper">
         <nav class="sidebar">
-    <div class="mb-5 px-2">
-        <h4 class="fw-bold text-primary mb-0">
-            <i class="bi bi-rocket-takeoff-fill me-2"></i>YourLogo
-        </h4>
-    </div>
-
-    @auth
-        <a href="/home" class="nav-link {{ request()->is('home') ? 'active' : '' }}">
-            <i class="bi bi-grid-1x2-fill"></i> Overview
-        </a>
-        <a href="#" class="nav-link">
-            <i class="bi bi-folder2-open"></i> Projects
-        </a>
-        <a href="#" class="nav-link">
-            <i class="bi bi-chat-dots"></i> Messages
-        </a>
-        <a href="#" class="nav-link">
-            <i class="bi bi-gear"></i> Settings
-        </a>
-
-        <div class="user-profile-container">
-            <div class="logout-popup" id="logoutPopup">
-                <div class="px-3 py-2 border-bottom bg-light">
-                    <span class="text-muted fw-bold" style="font-size: 0.7rem; text-uppercase; letter-spacing: 0.5px;">Action</span>
-                </div>
-                <a href="{{ route('logout') }}" 
-                   class="logout-item"
-                   onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                    <i class="bi bi-box-arrow-right me-2"></i> Logout
-                </a>
+            <div class="mb-5 px-2">
+                <h4 class="fw-bold text-primary mb-0">
+                    <i class="bi bi-shield-check me-2"></i>Admin Panel
+                </h4>
             </div>
 
-            <button class="user-trigger" onclick="togglePopup(event)">
-                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 38px; height: 38px; font-weight: 700; flex-shrink: 0;">
-                    {{ substr(Auth::user()->name, 0, 1) }}
-                </div>
-                <div class="small overflow-hidden flex-grow-1">
-                    <div class="fw-bold text-dark text-truncate">{{ Auth::user()->name }}</div>
-                    <div class="text-muted" style="font-size: 0.75rem;">{{ ucfirst(Auth::user()->role) }}</div>
-                </div>
-                <i class="bi bi-chevron-expand text-muted ms-2"></i>
-            </button>
+            @auth
+                <a href="{{ route('admin.dashboard') }}" class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+                    <i class="bi bi-grid-1x2-fill"></i> Dashboard
+                </a>
+                
+                <a href="{{ route('admin.items') }}" class="nav-link {{ request()->routeIs('admin.items*') ? 'active' : '' }}">
+                    <i class="bi bi-box-seam-fill"></i> Manage Items
+                </a>
+                
+                
+                <a href="{{ route('admin.users') }}" class="nav-link {{ request()->routeIs('admin.users') ? 'active' : '' }}">
+                    <i class="bi bi-people-fill"></i> System Users
+                </a>
 
-            <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
-                @csrf
-            </form>
-        </div>
-    @else
-        <a href="{{ route('login') }}" class="nav-link {{ request()->is('login') ? 'active' : '' }}">
-            <i class="bi bi-box-arrow-in-right"></i> Login
-        </a>
-        <a href="{{ route('register') }}" class="nav-link {{ request()->is('register') ? 'active' : '' }}">
-            <i class="bi bi-person-plus"></i> Register
-        </a>
-    @endauth
-</nav>
+                <div class="user-profile-container">
+                    <div class="logout-popup" id="logoutPopup">
+                        <div class="px-3 py-2 border-bottom bg-light">
+                            <span class="text-muted fw-bold" style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px;">Account</span>
+                        </div>
+                        <a href="{{ route('logout') }}" 
+                           class="logout-item"
+                           onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                            <i class="bi bi-box-arrow-right me-2"></i> Logout
+                        </a>
+                    </div>
+
+                    <button class="user-trigger" onclick="togglePopup(event)">
+                        <div class="bg-dark text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 38px; height: 38px; font-weight: 700; flex-shrink: 0;">
+                            {{ substr(Auth::user()->name, 0, 1) }}
+                        </div>
+                        <div class="small overflow-hidden flex-grow-1">
+                            <div class="fw-bold text-dark text-truncate">{{ Auth::user()->name }}</div>
+                            <div class="text-muted" style="font-size: 0.75rem;">Administrator</div>
+                        </div>
+                        <i class="bi bi-chevron-expand text-muted ms-2"></i>
+                    </button>
+
+                    <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                        @csrf
+                    </form>
+                </div>
+            @else
+                <a href="{{ route('login') }}" class="nav-link {{ request()->is('login') ? 'active' : '' }}">
+                    <i class="bi bi-box-arrow-in-right"></i> Login
+                </a>
+            @endauth
+        </nav>
 
         <main class="main-content">
             @yield('content')
@@ -198,11 +192,10 @@
             popup.classList.toggle('show');
         }
 
-        // Close popup if clicking anywhere else
         window.onclick = function(event) {
             const popup = document.getElementById('logoutPopup');
             if (!event.target.closest('.user-profile-container')) {
-                if (popup.classList.contains('show')) {
+                if (popup && popup.classList.contains('show')) {
                     popup.classList.remove('show');
                 }
             }

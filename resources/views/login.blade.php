@@ -3,16 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ config('app.name', 'Laravel') }} | Auth</title>
+    <title>Lost & Found | Auth</title>
     <link href="https://fonts.bunny.net/css?family=Plus+Jakarta+Sans:400,600,700" rel="stylesheet">
     <style>
         :root {
             --primary: #4f46e5;
-            --secondary: #6366f1;
-            --text-dark: #111827;
-            --text-muted: #6b7280;
-            --danger: #ef4444; /* Added for errors */
-            --transition: all 0.5s cubic-bezier(0.645, 0.045, 0.355, 1);
+            --gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            --danger: #ef4444;
+            --transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -24,6 +22,7 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
+            padding: 10px;
         }
 
         .container {
@@ -32,9 +31,9 @@
             box-shadow: 0 15px 35px rgba(0,0,0,0.1);
             position: relative;
             overflow: hidden;
-            width: 700px; 
-            max-width: 95%;
-            min-height: 450px; /* Increased slightly for error messages */
+            width: 768px;
+            max-width: 100%;
+            min-height: 520px; /* Extra height for validation messages */
         }
 
         .form-container {
@@ -52,7 +51,7 @@
             transform: translateX(100%);
             opacity: 1;
             z-index: 5;
-            animation: show 0.5s;
+            animation: show 0.6s;
         }
 
         @keyframes show {
@@ -66,103 +65,80 @@
             align-items: center;
             justify-content: center;
             flex-direction: column;
-            padding: 0 30px;
+            padding: 0 35px;
             height: 100%;
             text-align: center;
         }
 
-        h1 { font-weight: 700; margin-bottom: 8px; font-size: 1.4rem; color: var(--text-dark); }
-        p { font-size: 13px; color: var(--text-muted); margin-bottom: 15px; line-height: 1.4; }
-        .overlay p { color: rgba(255,255,255,0.9); }
+        h1 { font-weight: 700; margin-bottom: 5px; font-size: 1.5rem; color: #111827; }
+        p { font-size: 13px; color: #6b7280; margin-bottom: 15px; }
 
         input {
             background-color: #f9fafb;
             border: 1px solid #e5e7eb;
-            padding: 10px 12px;
+            padding: 10px 15px;
             margin: 5px 0;
             width: 100%;
-            border-radius: 10px;
+            border-radius: 12px;
             font-size: 13px;
             outline: none;
             transition: 0.2s;
         }
 
-        /* Error styling for inputs */
+        /* Validation Error Styles */
         input.is-invalid { border-color: var(--danger); background-color: #fef2f2; }
-        .error-msg { color: var(--danger); font-size: 10px; align-self: flex-start; margin-left: 5px; margin-bottom: 2px; }
+        .error-msg { color: var(--danger); font-size: 10px; align-self: flex-start; margin-left: 5px; margin-bottom: 2px; font-weight: 600; }
 
-        input:focus { border-color: var(--primary); background: #fff; box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
+        input:focus { border-color: var(--primary); background: #fff; box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1); }
 
         button {
-            border-radius: 10px;
-            border: 1px solid var(--primary);
-            background-color: var(--primary);
+            border-radius: 12px;
+            border: none;
+            background: var(--primary);
             color: #ffffff;
             font-size: 11px;
             font-weight: 700;
-            padding: 10px 30px;
-            letter-spacing: 0.5px;
+            padding: 12px 40px;
+            letter-spacing: 1px;
             text-transform: uppercase;
-            transition: transform 80ms ease-in, background 0.2s;
+            transition: transform 80ms ease-in, opacity 0.2s;
             cursor: pointer;
             margin-top: 10px;
         }
 
-        button:active { transform: scale(0.96); }
-        button.ghost { background-color: transparent; border-color: #ffffff; margin-top: 5px; }
+        button.ghost { background-color: transparent; border: 2px solid #ffffff; }
 
+        /* Overlay */
         .overlay-container {
             position: absolute;
-            top: 0;
-            left: 50%;
-            width: 50%;
-            height: 100%;
-            overflow: hidden;
-            transition: var(--transition);
-            z-index: 100;
+            top: 0; left: 50%; width: 50%; height: 100%;
+            overflow: hidden; transition: var(--transition); z-index: 100;
         }
-
         .container.right-panel-active .overlay-container { transform: translateX(-100%); }
-
         .overlay {
-            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-            color: #ffffff;
-            position: relative;
-            left: -100%;
-            height: 100%;
-            width: 200%;
-            transform: translateX(0);
-            transition: var(--transition);
+            background: var(--gradient); color: #ffffff; position: relative;
+            left: -100%; height: 100%; width: 200%; transform: translateX(0); transition: var(--transition);
         }
-
         .container.right-panel-active .overlay { transform: translateX(50%); }
 
         .overlay-panel {
-            position: absolute;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            padding: 0 25px;
-            text-align: center;
-            top: 0;
-            height: 100%;
-            width: 50%;
-            transition: var(--transition);
+            position: absolute; display: flex; align-items: center; justify-content: center;
+            flex-direction: column; padding: 0 40px; text-align: center; top: 0; height: 100%; width: 50%; transition: var(--transition);
         }
-
         .overlay-left { transform: translateX(-20%); }
         .container.right-panel-active .overlay-left { transform: translateX(0); }
         .overlay-right { right: 0; transform: translateX(0); }
         .container.right-panel-active .overlay-right { transform: translateX(20%); }
 
-        @media (max-width: 768px) {
-            .container { width: 90%; min-height: 500px; }
+        /* Mobile Adjustments */
+        @media (max-width: 600px) {
             .overlay-container { display: none; }
-            .sign-in-container, .sign-up-container { width: 100%; }
+            .form-container { width: 100% !important; }
+            .sign-in-container, .sign-up-container { transform: none !important; left: 0; width: 100%; }
             .container.right-panel-active .sign-in-container { display: none; }
-            .container.right-panel-active .sign-up-container { width: 100%; transform: none; opacity: 1; position: relative; }
+            .mobile-toggle { display: block !important; margin-top: 15px; color: var(--primary); font-size: 12px; text-decoration: underline; cursor: pointer; }
         }
+        .mobile-toggle { display: none; }
     </style>
 </head>
 <body>
@@ -182,10 +158,10 @@
 
             @error('password') <span class="error-msg">{{ $message }}</span> @enderror
             <input type="password" name="password" placeholder="Password" class="@error('password') is-invalid @enderror" required />
-            
-            <input type="password" name="password_confirmation" placeholder="Confirm" required />
-            
+            <input type="password" name="password_confirmation" placeholder="Confirm Password" required />
+
             <button type="submit">Sign Up</button>
+            <span class="mobile-toggle" onclick="container.classList.remove('right-panel-active')">Already have an account? Sign In</span>
         </form>
     </div>
 
@@ -195,7 +171,6 @@
             <h1>Sign in</h1>
             <p>Enter your details</p>
 
-            {{-- General Login Error (e.g., wrong credentials) --}}
             @if (session('status'))
                 <span class="error-msg" style="align-self:center; margin-bottom:10px;">{{ session('status') }}</span>
             @endif
@@ -206,8 +181,9 @@
             @error('password') <span class="error-msg">{{ $message }}</span> @enderror
             <input type="password" name="password" placeholder="Password" class="@error('password') is-invalid @enderror" required />
 
-            <a href="{{ route('password.request') }}" style="font-size:11px; color:#94a3b8; margin-top:8px; text-decoration:none;">Forgot password?</a>
+            <a href="#" style="font-size: 11px; color: #94a3b8; text-decoration: none; margin-top: 5px;">Forgot password?</a>
             <button type="submit">Sign In</button>
+            <span class="mobile-toggle" onclick="container.classList.add('right-panel-active')">New here? Sign Up</span>
         </form>
     </div>
 
@@ -229,19 +205,13 @@
 
 <script>
     const container = document.getElementById('container');
-    const signUpButton = document.getElementById('signUp');
-    const signInButton = document.getElementById('signIn');
+    const signUpBtn = document.getElementById('signUp');
+    const signInBtn = document.getElementById('signIn');
 
-    signUpButton.addEventListener('click', () => {
-        container.classList.add("right-panel-active");
-    });
+    signUpBtn.addEventListener('click', () => container.classList.add("right-panel-active"));
+    signInBtn.addEventListener('click', () => container.classList.remove("right-panel-active"));
 
-    signInButton.addEventListener('click', () => {
-        container.classList.remove("right-panel-active");
-    });
-
-    // Check if there are registration errors on page load
-    // If there are, automatically switch to the Sign Up panel
+    // FIXED: If there are validation errors on Sign Up, keep the panel on the right side
     @if($errors->has('name') || $errors->has('password') || (isset($errors) && $errors->has('email') && old('name')))
         container.classList.add("right-panel-active");
     @endif

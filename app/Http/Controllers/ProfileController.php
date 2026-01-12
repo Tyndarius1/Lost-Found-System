@@ -22,7 +22,7 @@ class ProfileController extends Controller
             'age' => 'nullable|integer|min:16|max:100',
             'bio' => 'nullable|string|max:1000',
             'phone' => 'nullable|string|max:20',
-            'profile_picture' => 'nullable|image|mimes:jpg,png,jpeg|max:2048'
+            'profile_picture' => 'nullable|image|mimes:jpg,png,jpeg,webp|max:2048'
         ]);
 
         $data = $request->except('profile_picture');

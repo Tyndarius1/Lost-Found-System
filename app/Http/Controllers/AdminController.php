@@ -6,9 +6,13 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Item;
 use App\Models\Claim;
+use Illuminate\Support\Facades\Hash;
 
 class AdminController extends Controller
 {
+
+    
+
       public function dashboard() {
         $usersCount = User::count();
         $itemsCount = Item::count();
@@ -22,10 +26,11 @@ class AdminController extends Controller
         return view('admin.items', compact('items'));
     }
 
-    public function claims() {
-        $claims = Claim::latest()->get();
-        return view('admin.claims', compact('claims'));
-    }
+public function claims() {
+    // Adding with() ensures we get the related data efficiently
+    $claims = Claim::with(['item', 'user'])->latest()->get();
+    return view('admin.claims', compact('claims'));
+}
 
     public function users() {
         $users = User::latest()->get();
@@ -83,5 +88,64 @@ public function updateItem(Request $request, Item $item)
 
     return redirect()->route('admin.items')->with('success', 'Item updated successfully.');
 }
+
+
+
+public function storeUser(Request $request)
+{
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'email' => 'required|string|email|max:255|unique:users',
+        'password' => 'required|string|min:8|confirmed',
+        'role' => 'required|in:user,admin',
+        'age' => 'nullable|integer',
+        'phone' => 'nullable|string|max:20',
+    ]);
+
+    User::create([
+        'name' => $request->name,
+        'email' => $request->email,
+        'password' => bcrypt($request->password),
+        'role' => $request->role,
+        'age' => $request->age,
+        'phone' => $request->phone,
+    ]);
+
+    return back()->with('success', 'User created successfully.');
+}
+
+public function updateUser(Request $request, User $user)
+    {
+        $request->validate([
+            'name'  => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $user->id,
+            'role'  => 'required|in:user,admin',
+            'age'   => 'nullable|integer',
+            'phone' => 'nullable|string|max:20',
+            'password' => 'nullable|string|min:8|confirmed',
+        ]);
+
+        $user->fill($request->only(['name', 'email', 'role', 'age', 'phone']));
+
+        if ($request->filled('password')) {
+            $user->password = Hash::make($request->password);
+        }
+
+        $user->save();
+
+        return back()->with('success', 'User updated successfully.');
+    }
+
+    public function deleteUser(User $user) 
+    {
+        if (auth()->id() === $user->id) {
+            return back()->with('error', 'You cannot delete yourself!');
+        }
+
+        $user->delete();
+        return back()->with('success', 'User deleted successfully.');
+    }
+    
+    // Remember to include your items, dashboard, and claims methods here too
 
 }

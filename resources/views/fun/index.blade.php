@@ -84,7 +84,7 @@
                     <p class="opacity-75 mb-4 ls-wide fw-medium">CONDITION: {{ strtoupper($condition) }}</p>
 
                     {{-- MIDDLE SECTION --}}
-                    <div class="bg-white bg-opacity-20 py-4 rounded-4 mb-4 shadow-sm border border-white border-opacity-10">
+                    <div class="bg-gray bg-opacity-20 py-4 rounded-4 mb-4 shadow-sm border border-white border-opacity-10">
                         <span class="text-uppercase small fw-bold opacity-75 d-block mb-1">Current Temperature</span>
                         <h1 class="display-1 fw-bold mb-0 text-shadow" style="letter-spacing: -4px;">
                             {{ round($weather['current_weather']['temperature']) }}°

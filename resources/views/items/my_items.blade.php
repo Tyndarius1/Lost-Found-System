@@ -16,21 +16,36 @@
 
     @keyframes shine { to { background-position-x: -200%; } }
 
+    /* Initial state: Hide content, show skeleton */
     #actual-content { display: none; }
+
+    /* Prevent clipping and handle stacking (Original Styles) */
+    .item-list-card {
+        transition: transform 0.2s, box-shadow 0.2s;
+        border: 1px solid rgba(0,0,0,0.05);
+        overflow: visible !important;
+    }
+    .item-list-card:focus-within { z-index: 10; }
+    .item-list-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.05) !important;
+    }
+    .action-dot-btn:hover { background-color: #6366f1 !important; color: white !important; }
+    .dropdown-item { font-weight: 500; transition: all 0.2s; }
+    .dropdown-item:hover { background-color: #f8fafc; }
 </style>
 
 <div class="container pb-5">
     <div id="skeleton-loader">
         <div class="d-flex justify-content-between align-items-center mb-5">
             <div>
-                <div class="skeleton" style="width: 250px; height: 35px; border-radius: 8px; mb-2"></div>
+                <div class="skeleton" style="width: 250px; height: 35px; border-radius: 8px; margin-bottom: 10px;"></div>
                 <div class="skeleton skeleton-text" style="width: 350px;"></div>
             </div>
             <div class="skeleton" style="width: 150px; height: 45px; border-radius: 50px;"></div>
         </div>
 
         <div class="row g-4 mb-5">
-            @for($i = 0; $i < 2; $i++)
             <div class="col-md-4">
                 <div class="card border-0 shadow-sm p-3" style="border-radius: 16px;">
                     <div class="d-flex align-items-center">
@@ -42,7 +57,17 @@
                     </div>
                 </div>
             </div>
-            @endfor
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm p-3" style="border-radius: 16px;">
+                    <div class="d-flex align-items-center">
+                        <div class="skeleton skeleton-circle me-3" style="width: 55px; height: 55px;"></div>
+                        <div class="flex-grow-1">
+                            <div class="skeleton skeleton-text" style="width: 60%;"></div>
+                            <div class="skeleton skeleton-text" style="width: 40%; height: 25px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="row g-3">
@@ -56,7 +81,7 @@
                             <div class="d-flex gap-3"><div class="skeleton skeleton-text" style="width: 80px;"></div><div class="skeleton skeleton-text" style="width: 80px;"></div></div>
                         </div>
                         <div class="col-auto d-flex gap-2">
-                            <div class="skeleton skeleton-badge" style="width: 80px; height: 30px;"></div>
+                            <div class="skeleton skeleton-badge" style="width: 80px; height: 35px;"></div>
                             <div class="skeleton skeleton-circle"></div>
                         </div>
                     </div>
@@ -147,12 +172,22 @@
                                         <button class="btn btn-light rounded-circle shadow-sm action-dot-btn" 
                                                 type="button" 
                                                 data-bs-toggle="dropdown" 
+                                                data-bs-boundary="viewport"
+                                                aria-expanded="false" 
                                                 style="width: 42px; height: 42px;">
                                             <i class="bi bi-three-dots-vertical"></i>
                                         </button>
                                         <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg p-2 mt-2" style="border-radius: 15px; min-width: 180px;">
-                                            <li><a class="dropdown-item rounded-3 py-2" href="{{ route('items.show', $item->id) }}"><i class="bi bi-eye me-2 text-primary"></i> View Details</a></li>
-                                            <li><a class="dropdown-item rounded-3 py-2" href="{{ route('items.edit', $item->id) }}"><i class="bi bi-pencil-square me-2 text-warning"></i> Edit Post</a></li>
+                                            <li>
+                                                <a class="dropdown-item rounded-3 py-2" href="{{ route('items.show', $item->id) }}">
+                                                    <i class="bi bi-eye me-2 text-primary"></i> View Details
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item rounded-3 py-2" href="{{ route('items.edit', $item->id) }}">
+                                                    <i class="bi bi-pencil-square me-2 text-warning"></i> Edit Post
+                                                </a>
+                                            </li>
                                             <li><hr class="dropdown-divider opacity-50"></li>
                                             <li>
                                                 <form action="{{ route('items.destroy', $item->id) }}" method="POST" id="delete-form-{{ $item->id }}">
@@ -188,27 +223,59 @@
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        setTimeout(() => {
-            document.getElementById('skeleton-loader').style.display = 'none';
-            document.getElementById('actual-content').style.display = 'block';
-        }, 1000); // 1-second shimmy
+// Toggle Skeleton to Content
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(() => {
+        document.getElementById('skeleton-loader').style.display = 'none';
+        document.getElementById('actual-content').style.display = 'block';
+    }, 1000); // 1 second delay
+});
+
+// Small Toast configuration for Success Messages
+const Toast = Swal.mixin({
+    toast: true,
+    position: 'top-end',
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+    didOpen: (toast) => {
+        toast.addEventListener('mouseenter', Swal.stopTimer)
+        toast.addEventListener('mouseleave', Swal.resumeTimer)
+    },
+    customClass: {
+        popup: 'rounded-4 border-0 shadow-sm mt-3 me-3',
+    }
+});
+
+@if(session('success'))
+    Toast.fire({
+        icon: 'success',
+        title: "{{ session('success') }}"
     });
+@endif
 
-    // ... (Your existing confirmDelete and Toast scripts)
+function confirmDelete(id) {
+    Swal.fire({
+        title: 'Delete this post?',
+        text: "This action cannot be undone!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#6366f1',
+        cancelButtonColor: '#f1f5f9',
+        confirmButtonText: 'Yes, delete it',
+        cancelButtonText: 'Cancel',
+        reverseButtons: true,
+        customClass: {
+            popup: 'rounded-4 shadow-lg border-0',
+            confirmButton: 'btn btn-primary px-4 py-2 rounded-pill fw-bold ms-2',
+            cancelButton: 'btn btn-light px-4 py-2 rounded-pill fw-bold text-dark'
+        },
+        buttonsStyling: false
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.getElementById('delete-form-' + id).submit();
+        }
+    })
+}
 </script>
-
-<style>
-    /* Prevent clipping and handle stacking */
-    .item-list-card {
-        transition: transform 0.2s, box-shadow 0.2s;
-        border: 1px solid rgba(0,0,0,0.05);
-        overflow: visible !important;
-    }
-    .item-list-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.05) !important;
-    }
-    .action-dot-btn:hover { background-color: #6366f1 !important; color: white !important; }
-</style>
 @endsection
