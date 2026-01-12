@@ -129,17 +129,19 @@
 <body>
     <div class="wrapper">
         <nav class="sidebar">
-    <div class="mb-5 px-2">
-        <h4 class="fw-bold text-primary mb-0">
-            <i class="bi bi-rocket-takeoff-fill me-2"></i>YourLogo
-        </h4>
-    </div>
+        <div class="mb-5 text-center px-2">
+            <a href="{{ route('home') }}">
+                    <div class="fw-bold text-primary fs-3" style="letter-spacing: -1px;">
+                        <i class="bi bi-intersect me-2"></i>Lost & Found
+                    </div>
+            </a>
+        </div>
 
     @auth
-        <a href="/home" class="nav-link {{ request()->is('home') ? 'active' : '' }}">
-            <i class="bi bi-grid-1x2-fill"></i> Overview
+        <a href="/admin" class="nav-link {{ request()->is('admin') ? 'active' : '' }}">
+            <i class="bi bi-grid-1x2-fill"></i> Dashboard
         </a>
-        <a href="#" class="nav-link">
+        <!-- <a href="#" class="nav-link">
             <i class="bi bi-folder2-open"></i> Projects
         </a>
         <a href="#" class="nav-link">
@@ -147,7 +149,7 @@
         </a>
         <a href="#" class="nav-link">
             <i class="bi bi-gear"></i> Settings
-        </a>
+        </a> -->
 
         <div class="user-profile-container">
             <div class="logout-popup" id="logoutPopup">

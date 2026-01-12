@@ -41,6 +41,7 @@ Route::middleware(['auth'])->group(function () {
     // Add this inside your auth middleware group
     Route::get('/my-items', [ItemController::class, 'userItems'])->name('items.user');
     Route::get('/home', [ClaimController::class, 'index'])->name('home')->middleware('auth');
+    Route::get('/admin', [ItemController::class, 'recent'])->name('admin.dashboard');
     Route::get('/items', [ItemController::class, 'index'])->name('items.index');
     Route::get('/items/create', [ItemController::class, 'create'])->name('items.create');
     Route::post('/items', [ItemController::class, 'store'])->name('items.store');
@@ -70,6 +71,8 @@ Route::middleware(['auth', AdminMiddleware::class])->group(function () {
 
     // --- Dashboard ---
     Route::get('/admin', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+    // Route::get('/admin', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+
 
     // --- Items ---
     Route::get('/admin/items', [AdminController::class, 'items'])->name('admin.items');

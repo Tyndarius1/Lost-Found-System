@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ config('app.name', 'Laravel') }} | Auth</title>
     <link href="https://fonts.bunny.net/css?family=Plus+Jakarta+Sans:400,600,700" rel="stylesheet">
+        @vite(['resources/sass/app.scss', 'resources/js/app.js'])
+           <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
     <style>
         :root {
             --primary: #4f46e5;
@@ -15,9 +18,10 @@
             --transition: all 0.5s cubic-bezier(0.645, 0.045, 0.355, 1);
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
 
-        body {
+
+        .card {
             font-family: 'Plus Jakarta Sans', sans-serif;
             background: #f3f4f6;
             display: flex;
@@ -167,7 +171,22 @@
 </head>
 <body>
 
-<div class="container" id="container">
+
+        
+
+<div class="card">
+     <div class="fw-bold text-primary fs-3" style="letter-spacing: -1px;">
+                        <i class="bi bi-intersect me-2"></i>Lost & Found
+                    </div>
+        @if(!auth()->check())
+        <div style="color: #6e6d6c; margin: 10px 0 10px 0; text-align: center; font-size: 14px; font-weight: 500;">
+            You must log in to view or report lost items.
+                               
+        </div>
+    @endif
+    <div class="container" id="container">
+        
+
     <div class="form-container sign-up-container">
         <form action="{{ route('register') }}" method="POST">
             @csrf
@@ -225,6 +244,7 @@
             </div>
         </div>
     </div>
+</div>
 </div>
 
 <script>
